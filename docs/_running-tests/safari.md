@@ -1,7 +1,5 @@
----
-layout: page
-title: Safari
----
+# Safari
+
 To run Safari on macOS, some manual setup is required:
 
   * Allow Safari to be controlled by SafariDriver: `safaridriver --enable`
