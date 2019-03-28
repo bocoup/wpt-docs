@@ -14,10 +14,10 @@
 
 import os
 import sys
+sys.path.insert(0, os.path.abspath('..'))
 sys.path.insert(0, os.path.abspath('../tools/wptserve'))
 sys.path.insert(0, os.path.abspath('../tools'))
 import localpaths
-print sys.path
 
 # -- Project information -----------------------------------------------------
 
@@ -42,7 +42,8 @@ release = u''
 # ones.
 extensions = [
     'recommonmark',
-    'sphinx.ext.autodoc'
+    'sphinx.ext.autodoc',
+    'sphinxarg.ext'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
