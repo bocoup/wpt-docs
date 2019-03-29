@@ -13,6 +13,7 @@ import tempfile
 from collections import defaultdict
 
 from . import fnmatch
+from . import rules
 from .. import localpaths
 from ..gitignore.gitignore import PathFilter
 from ..wpt import testfiles
@@ -319,83 +320,62 @@ def filter_whitelist_errors(data, errors):
 
     return [item for i, item in enumerate(errors) if not whitelisted[i]]
 
-class Regexp(object):
-    pattern = None
-    file_extensions = None
-    error = None
-    _re = None
-
-    def __init__(self):
-        self._re = re.compile(self.pattern)
-
-    def applies(self, path):
-        return (self.file_extensions is None or
-                os.path.splitext(path)[1] in self.file_extensions)
-
-    def search(self, line):
-        return self._re.search(line)
-
-class TrailingWhitespaceRegexp(Regexp):
-    pattern = b"[ \t\f\v]$"
-    error = "TRAILING WHITESPACE"
-    description = "Whitespace at EOL"
-
-class TabsRegexp(Regexp):
+class TabsRegexp(rules.Regexp):
     pattern = b"^\t"
     error = "INDENT TABS"
     description = "Tabs used for indentation"
 
-class CRRegexp(Regexp):
+class CRRegexp(rules.Regexp):
     pattern = b"\r$"
     error = "CR AT EOL"
     description = "CR character in line separator"
 
-class SetTimeoutRegexp(Regexp):
+class SetTimeoutRegexp(rules.Regexp):
     pattern = b"setTimeout\s*\("
     error = "SET TIMEOUT"
     file_extensions = [".html", ".htm", ".js", ".xht", ".xhtml", ".svg"]
     description = "setTimeout used; step_timeout should typically be used instead"
 
-class W3CTestOrgRegexp(Regexp):
+class W3CTestOrgRegexp(rules.Regexp):
     pattern = b"w3c\-test\.org"
     error = "W3C-TEST.ORG"
     description = "External w3c-test.org domain used"
 
-class WebPlatformTestRegexp(Regexp):
+class WebPlatformTestRegexp(rules.Regexp):
     pattern = b"web\-platform\.test"
     error = "WEB-PLATFORM.TEST"
     description = "Internal web-platform.test domain used"
 
-class Webidl2Regexp(Regexp):
+class Webidl2Regexp(rules.Regexp):
     pattern = b"webidl2\.js"
     error = "WEBIDL2.JS"
     description = "Legacy webidl2.js script used"
 
-class ConsoleRegexp(Regexp):
+class ConsoleRegexp(rules.Regexp):
     pattern = b"console\.[a-zA-Z]+\s*\("
     error = "CONSOLE"
     file_extensions = [".html", ".htm", ".js", ".xht", ".xhtml", ".svg"]
     description = "Console logging API used"
 
-class GenerateTestsRegexp(Regexp):
+class GenerateTestsRegexp(rules.Regexp):
     pattern = b"generate_tests\s*\("
     error = "GENERATE_TESTS"
     file_extensions = [".html", ".htm", ".js", ".xht", ".xhtml", ".svg"]
     description = "generate_tests used"
 
-class PrintRegexp(Regexp):
+class PrintRegexp(rules.Regexp):
     pattern = b"print(?:\s|\s*\()"
     error = "PRINT STATEMENT"
     file_extensions = [".py"]
     description = "Print function used"
 
-class LayoutTestsRegexp(Regexp):
+class LayoutTestsRegexp(rules.Regexp):
     pattern = b"eventSender|testRunner|window\.internals"
     error = "LAYOUTTESTS APIS"
     file_extensions = [".html", ".htm", ".js", ".xht", ".xhtml", ".svg"]
     description = "eventSender/testRunner/window.internals used; these are LayoutTests-specific APIs (WebKit/Blink)"
 
-class SpecialPowersRegexp(Regexp):
+class SpecialPowersRegexp(rules.Regexp):
     pattern = b"SpecialPowers"
     error = "SPECIALPOWERS API"
     file_extensions = [".html", ".htm", ".js", ".xht", ".xhtml", ".svg"]
@@ -403,7 +383,7 @@ class SpecialPowersRegexp(Regexp):
 
 
 regexps = [item() for item in
-           [TrailingWhitespaceRegexp,
+           [rules.TrailingWhitespaceRegexp,
             TabsRegexp,
             CRRegexp,
             SetTimeoutRegexp,
@@ -424,7 +404,7 @@ def check_regexp_line(repo_root, path, f):
     for i, line in enumerate(f):
         for regexp in applicable_regexps:
             if regexp.search(line):
-                errors.append((regexp.error, regexp.description, path, i+1))
+                errors.append((regexp.name, regexp.description, path, i+1))
 
     return errors
 
@@ -442,7 +422,7 @@ def check_parsed(repo_root, path, f):
         if (source_file.type != "support" and
             not source_file.name_is_reference and
             not source_file.spec_links):
-            return [("MISSING-LINK", "Testcase file must have a link to a spec", path, None)]
+            return rules.MissingLink.error(path, None)
 
     if source_file.name_is_non_test:
         return []

@@ -12,9 +12,9 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-#import os
-#import sys
-#sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+sys.path.insert(0, os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
 
@@ -72,11 +72,13 @@ exclude_patterns = [
     '_venv'
 ]
 
+from docs.wpt_lint_rules import WPTLintRules
 # Enable inline reStructured Text within Markdown-formatted files
 # https://recommonmark.readthedocs.io/en/latest/auto_structify.html
 from recommonmark.transform import AutoStructify
 def setup(app):
     app.add_transform(AutoStructify)
+    app.add_directive('wpt-lint-rules', WPTLintRules)
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None
