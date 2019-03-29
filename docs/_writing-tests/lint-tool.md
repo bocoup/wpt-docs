@@ -22,6 +22,10 @@ those cases you can [whitelist test files](#updating-the-whiteslist)
 to suppress the errors. In all other cases, follow the instructions
 below to fix all errors reported.
 
+```eval_rst
+.. wpt-lint-rules:: tools.lint.rules
+```
+
 * **CONSOLE**: Test-file line has a `console.*(...)` call; **fix**: remove
   the `console.*(...)` call (and in some cases, consider adding an
   `assert_*` of some kind in place of it).
@@ -55,9 +59,6 @@ below to fix all errors reported.
   element whose `content` attribute has a malformed value; **fix**: ensure
   the value of the `content` attribute starts with `?` or `#` or is empty.
 
-* **MISSING-LINK**: CSS test file is missing a link to a spec. **fix**: Ensure that there is a `<link rel="help" href="[url]">` for the spec.
-  * Note: `MISSING-LINK` is designed to ensure that the CSS build tool can find the tests. Note that the CSS build system is primarily used by [test.csswg.org/](http://test.csswg.org/), which doesn't use `wptserve`, so `*.any.js` and similar tests won't work there; stick with the `.html` equivalent.
-
 * **MISSING-TESTHARNESSREPORT**: Test file is missing an instance of
   `<script src='/resources/testharnessreport.js'>`; **fix**: ensure each
   test file contains `<script src='/resources/testharnessreport.js'>`.
@@ -86,9 +87,6 @@ below to fix all errors reported.
 
 * **SET TIMEOUT**: Test-file line has `setTimeout(...)` call; **fix**:
   replace all `setTimeout(...)` calls with `step_timeout(...)` calls.
-
-* **TRAILING WHITESPACE**: Test-file line has trailing whitespace; **fix**:
-  remove trailing whitespace from all lines in the file.
 
 * **VARIANT-MISSING**: Test file with a `<meta name='variant'...>` element
   that's missing a `content` attribute; **fix**: add a `content` attribute
